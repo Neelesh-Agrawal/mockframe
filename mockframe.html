@@ -1,300 +1,193 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mockframe · Ship69 Day 52</title>
-  <meta name="description" content="Generate browser and phone mockframes for your product — Ship69 Day 52 build." />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <style>
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Inter',sans-serif;background:#f0f0f0;color:#0a0a0a;}
-  #mf{min-height:100vh;display:flex;flex-direction:column;}
-
-  /* NAV */
-  #mf-nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 20px;height:48px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
-  .mf-logo{font-family:'Space Mono',monospace;font-size:13px;color:#0a0a0a;}
-  .mf-nav-tag{font-family:'Space Mono',monospace;font-size:11px;color:#bbb;}
-
-  /* CONTROLS */
-  #mf-controls{background:#fff;border-bottom:1px solid #e8e8e8;padding:14px 20px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;flex-shrink:0;}
-  .mf-ctrl-group{display:flex;flex-direction:column;gap:5px;}
-  .mf-ctrl-label{font-family:'Space Mono',monospace;font-size:10px;color:#aaa;letter-spacing:0.1em;text-transform:uppercase;}
-  .mf-input{height:36px;padding:0 12px;border:1px solid #e0e0e0;border-radius:6px;font-size:13px;font-family:'Inter',sans-serif;color:#0a0a0a;outline:none;background:#fff;}
-  .mf-input:focus{border-color:#aaa;}
-  .mf-input-url{width:220px;}
-  .mf-input-title{width:160px;}
-  .mf-seg{display:flex;border:1px solid #e0e0e0;border-radius:6px;overflow:hidden;height:36px;}
-  .mf-seg-btn{padding:0 14px;background:#fff;border:none;font-size:12px;font-family:'Inter',sans-serif;color:#888;cursor:pointer;border-right:1px solid #e0e0e0;transition:all 0.1s;white-space:nowrap;}
-  .mf-seg-btn:last-child{border-right:none;}
-  .mf-seg-btn.on{background:#0a0a0a;color:#fff;}
-  .mf-generate{height:36px;padding:0 20px;background:#0a0a0a;color:#fff;border:none;border-radius:6px;font-size:13px;font-family:'Inter',sans-serif;cursor:pointer;}
-  .mf-generate:hover{background:#333;}
-
-  /* CANVAS */
-  #mf-canvas{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;background:#f0f0f0;}
-
-  /* BROWSER MOCKUP */
-  .mock-browser{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.15),0 4px 16px rgba(0,0,0,0.08);width:100%;max-width:640px;}
-  .mock-browser.dark{background:#1e1e1e;box-shadow:0 20px 60px rgba(0,0,0,0.4),0 4px 16px rgba(0,0,0,0.2);}
-  .browser-chrome{padding:10px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f0f0f0;}
-  .mock-browser.dark .browser-chrome{border-bottom-color:#2a2a2a;background:#2a2a2a;}
-  .browser-dots{display:flex;gap:6px;}
-  .browser-dot{width:10px;height:10px;border-radius:50%;}
-  .browser-urlbar{flex:1;background:#f5f5f5;border-radius:5px;padding:5px 10px;display:flex;align-items:center;gap:6px;}
-  .mock-browser.dark .browser-urlbar{background:#3a3a3a;}
-  .browser-lock{width:10px;height:10px;border-radius:1px;border:1.5px solid #aaa;position:relative;}
-  .browser-lock::after{content:'';position:absolute;width:6px;height:5px;border:1.5px solid #aaa;border-radius:2px 2px 0 0;top:-5px;left:0px;}
-  .browser-url{font-family:'Space Mono',monospace;font-size:10px;color:#aaa;}
-  .mock-browser.dark .browser-url{color:#666;}
-  .browser-content{min-height:320px;background:#fff;display:flex;flex-direction:column;}
-  .mock-browser.dark .browser-content{background:#111;}
-  .browser-content-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 40px;text-align:center;}
-  .bc-tag{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.15em;color:#bbb;text-transform:uppercase;margin-bottom:16px;}
-  .mock-browser.dark .bc-tag{color:#444;}
-  .bc-title{font-size:28px;font-weight:600;color:#0a0a0a;line-height:1.1;margin-bottom:10px;max-width:360px;}
-  .mock-browser.dark .bc-title{color:#f0f0f0;}
-  .bc-desc{font-size:13px;color:#888;line-height:1.6;max-width:320px;margin-bottom:24px;}
-  .mock-browser.dark .bc-desc{color:#555;}
-  .bc-cta{display:flex;gap:8px;}
-  .bc-btn{padding:8px 20px;border-radius:6px;font-size:13px;font-weight:500;}
-  .bc-btn-p{background:#0a0a0a;color:#fff;border:none;}
-  .mock-browser.dark .bc-btn-p{background:#f0f0f0;color:#0a0a0a;}
-  .bc-btn-s{background:transparent;color:#888;border:1px solid #e0e0e0;}
-  .mock-browser.dark .bc-btn-s{border-color:#2a2a2a;color:#666;}
-  .browser-content-footer{padding:16px 24px;border-top:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;}
-  .mock-browser.dark .browser-content-footer{border-top-color:#1a1a1a;}
-  .bcf-left{display:flex;gap:16px;}
-  .bcf-link{font-size:11px;color:#ccc;font-family:'Space Mono',monospace;}
-  .mock-browser.dark .bcf-link{color:#333;}
-  .bcf-right{font-family:'Space Mono',monospace;font-size:11px;color:#ddd;}
-  .mock-browser.dark .bcf-right{color:#333;}
-
-  /* PHONE MOCKUP */
-  .mock-phone{display:flex;flex-direction:column;align-items:center;}
-  .phone-outer{width:220px;background:#1a1a1a;border-radius:36px;padding:12px;box-shadow:0 24px 64px rgba(0,0,0,0.25),0 4px 16px rgba(0,0,0,0.15),inset 0 0 0 1px rgba(255,255,255,0.08);}
-  .mock-phone.light .phone-outer{background:#e8e8e8;box-shadow:0 24px 64px rgba(0,0,0,0.12),0 4px 16px rgba(0,0,0,0.08),inset 0 0 0 1px rgba(0,0,0,0.08);}
-  .phone-screen{background:#fff;border-radius:26px;overflow:hidden;}
-  .mock-phone.light .phone-screen{background:#f5f5f5;}
-  .phone-status{padding:8px 16px 4px;display:flex;justify-content:space-between;align-items:center;background:#fff;}
-  .mock-phone.light .phone-status{background:#f5f5f5;}
-  .phone-time{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:#0a0a0a;}
-  .phone-icons{display:flex;gap:4px;align-items:center;}
-  .phone-icon-bar{width:14px;height:7px;border:1.5px solid #0a0a0a;border-radius:2px;position:relative;}
-  .phone-icon-bar::before{content:'';position:absolute;left:1px;top:1px;bottom:1px;width:60%;background:#0a0a0a;border-radius:1px;}
-  .phone-icon-sig{display:flex;gap:2px;align-items:flex-end;}
-  .phone-sig-bar{width:3px;background:#0a0a0a;border-radius:1px;}
-  .phone-header{padding:12px 16px 8px;background:#fff;}
-  .mock-phone.light .phone-header{background:#f5f5f5;}
-  .phone-header-title{font-size:18px;font-weight:600;color:#0a0a0a;line-height:1.1;}
-  .phone-header-sub{font-size:11px;color:#aaa;margin-top:3px;}
-  .phone-content{padding:12px 16px;background:#fff;min-height:240px;}
-  .mock-phone.light .phone-content{background:#f5f5f5;}
-  .phone-card{background:#f8f8f8;border-radius:10px;padding:12px;margin-bottom:8px;}
-  .mock-phone.light .phone-card{background:#fff;}
-  .phone-card-title{font-size:12px;font-weight:500;color:#0a0a0a;margin-bottom:4px;}
-  .phone-card-sub{font-size:11px;color:#aaa;line-height:1.4;}
-  .phone-card-bar{height:4px;background:#e8e8e8;border-radius:2px;margin-top:8px;}
-  .phone-card-fill{height:100%;border-radius:2px;background:#0a0a0a;}
-  .mock-phone.light .phone-card-fill{background:#333;}
-  .phone-nav{padding:8px 16px 12px;background:#fff;border-top:1px solid #f0f0f0;display:flex;justify-content:space-around;}
-  .mock-phone.light .phone-nav{background:#f5f5f5;border-top-color:#e0e0e0;}
-  .phone-nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;}
-  .phone-nav-dot{width:5px;height:5px;border-radius:50%;background:transparent;}
-  .phone-nav-item.active .phone-nav-dot{background:#0a0a0a;}
-  .mock-phone.light .phone-nav-item.active .phone-nav-dot{background:#333;}
-  .phone-nav-icon{width:18px;height:18px;border-radius:3px;background:#e0e0e0;}
-  .phone-nav-item.active .phone-nav-icon{background:#0a0a0a;}
-  .mock-phone.light .phone-nav-item.active .phone-nav-icon{background:#333;}
-  .phone-home-bar{width:80px;height:4px;background:#0a0a0a;border-radius:2px;margin:8px auto 0;opacity:0.15;}
-
-  /* INFO BAR */
-  #mf-info{background:#fff;border-top:1px solid #e8e8e8;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
-  #mf-info-left{font-family:'Space Mono',monospace;font-size:11px;color:#aaa;}
-  .mf-dl-btn{padding:7px 16px;background:#0a0a0a;color:#fff;border:none;border-radius:6px;font-size:12px;font-family:'Space Mono',monospace;cursor:pointer;letter-spacing:0.05em;}
-  .mf-dl-btn:hover{background:#333;}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mockframe · Beautiful screenshot mockups in seconds</title>
+<meta name="description" content="Drop a screenshot, frame it in a browser or phone on a gradient background, and download a crisp PNG for your portfolio, case study or social post.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f4ef;--panel:#fff;--ink:#16130f;--muted:#6b645b;--line:#e4dfd6;--soft:#efebe3;--mono:'JetBrains Mono',ui-monospace,monospace}
+@media (prefers-color-scheme:dark){:root{--bg:#121110;--panel:#1b1a18;--ink:#f3efe8;--muted:#a39b90;--line:#2e2b27;--soft:#24221f}}
+*{box-sizing:border-box;margin:0}
+body{font:15px/1.5 Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+.app{display:grid;grid-template-columns:340px 1fr;min-height:100vh}
+aside{background:var(--panel);border-right:1px solid var(--line);padding:20px;display:flex;flex-direction:column;gap:18px;max-height:100vh;overflow:auto;position:sticky;top:0}
+.brand{display:flex;justify-content:space-between;align-items:center}
+.brand b{display:flex;align-items:center;gap:10px;font-size:1.05rem}
+.brand b i{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#7c3aed,#f472b6);position:relative}
+.brand b i::after{content:'';position:absolute;inset:6px 5px 8px;border-radius:3px;background:#fff}
+.brand a{font-size:.75rem;color:var(--muted);text-decoration:none}
+.lead{color:var(--muted);font-size:.86rem;margin-top:-8px}
+h3{font:600 .7rem var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:10px}
+.drop{border:1.5px dashed var(--line);border-radius:14px;padding:18px;text-align:center;font-size:.85rem;color:var(--muted);cursor:pointer;transition:border-color .2s,background .2s}
+.drop:hover,.drop.over{border-color:var(--ink);background:var(--soft);color:var(--ink)}
+.drop b{display:block;color:var(--ink);margin-bottom:2px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;padding:3px;border-radius:10px;background:var(--soft);gap:2px}
+.seg button{border:0;background:transparent;padding:8px 6px;border-radius:8px;font-size:.8rem;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed=true]{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.bgs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.bgs button{aspect-ratio:1;border-radius:10px;border:2px solid transparent;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.bgs button[aria-pressed=true]{border-color:var(--ink)}
+.bgs label{aspect-ratio:1;border-radius:10px;position:relative;overflow:hidden;background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red);box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.bgs label input{position:absolute;inset:-6px;width:150%;height:150%;opacity:0;cursor:pointer}
+.bgs .clear{background:repeating-conic-gradient(#ccc 0 25%,#fff 0 50%) 0 0/12px 12px}
+.slider{display:grid;grid-template-columns:70px 1fr 42px;align-items:center;gap:10px;font-size:.82rem;margin-bottom:8px}
+.slider output{font:500 .74rem var(--mono);text-align:right;color:var(--muted)}
+input[type=range]{width:100%;accent-color:var(--ink)}
+.field{display:flex;flex-direction:column;gap:5px;font-size:.78rem;color:var(--muted);margin-bottom:8px}
+.field input{padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:var(--bg);font-size:.86rem;color:var(--ink)}
+.row{display:flex;gap:8px}
+.btn{flex:1;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--panel);font-weight:600;font-size:.86rem;transition:transform .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+main{display:flex;align-items:center;justify-content:center;padding:28px;min-height:100vh;background:repeating-conic-gradient(var(--soft) 0 25%,transparent 0 50%) 0 0/22px 22px}
+canvas{max-width:100%;max-height:calc(100vh - 56px);height:auto;border-radius:6px;box-shadow:0 20px 50px -24px rgba(0,0,0,.35)}
+.hint{font-size:.78rem;color:var(--muted)}
+footer{font-size:.74rem;color:var(--muted);margin-top:auto}
+footer a{color:inherit}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:.85rem;font-weight:600;transition:all .25s;pointer-events:none;z-index:10}
+.toast.on{opacity:1;transform:translateX(-50%)}
+@media (max-width:860px){.app{grid-template-columns:1fr}main{order:-1;min-height:auto;padding:16px;position:sticky;top:0;z-index:1;background-color:var(--bg)}canvas{max-height:46vh}aside{max-height:none;position:static;border-right:0;border-top:1px solid var(--line)}}
+</style>
 </head>
 <body>
+<div class="app">
+  <aside>
+    <div class="brand"><b><i aria-hidden="true"></i>Mockframe</b><a href="https://neeleshagrawal.vercel.app" target="_blank" rel="noopener">by Neelesh ↗</a></div>
+    <p class="lead">Turn a plain screenshot into a polished mockup for your portfolio, case study or launch post.</p>
 
-<div id="mf">
-  <div id="mf-nav">
-    <div class="mf-logo">Mockframe</div>
-    <div class="mf-nav-tag">day 52 · ship69</div>
-  </div>
+    <div><h3>Screenshot</h3>
+      <label class="drop" id="drop"><b>Drop, paste or choose an image</b>PNG, JPG or WebP · Ctrl/⌘ + V works anywhere<input type="file" id="file" accept="image/*" hidden></label>
+      <p class="hint" id="nofile" style="margin-top:8px">No image yet, so a placeholder page is shown. Edit its text below.</p>
+    </div>
 
-  <div id="mf-controls">
-    <div class="mf-ctrl-group">
-      <div class="mf-ctrl-label">URL / site</div>
-      <input class="mf-input mf-input-url" id="mf-url" placeholder="yoursite.com" value="escape9to5.vercel.app" />
+    <div><h3>Frame</h3>
+      <div class="seg" id="frame"><button data-v="browser" aria-pressed="true">Browser</button><button data-v="browser-dark" aria-pressed="false">Dark</button><button data-v="phone" aria-pressed="false">Phone</button><button data-v="none" aria-pressed="false">None</button></div>
     </div>
-    <div class="mf-ctrl-group">
-      <div class="mf-ctrl-label">Page title</div>
-      <input class="mf-input mf-input-title" id="mf-title" placeholder="Product name" value="Escape 9–5" />
-    </div>
-    <div class="mf-ctrl-group">
-      <div class="mf-ctrl-label">Description</div>
-      <input class="mf-input" style="width:200px;" id="mf-desc" placeholder="One-liner description" value="The office survival platformer" />
-    </div>
-    <div class="mf-ctrl-group">
-      <div class="mf-ctrl-label">Device</div>
-      <div class="mf-seg" id="mf-device-seg">
-        <button class="mf-seg-btn on" onclick="setDevice('browser',this)">Browser</button>
-        <button class="mf-seg-btn" onclick="setDevice('phone-dark',this)">Phone Dark</button>
-        <button class="mf-seg-btn" onclick="setDevice('phone-light',this)">Phone Light</button>
-      </div>
-    </div>
-    <div class="mf-ctrl-group">
-      <div class="mf-ctrl-label">Chrome</div>
-      <div class="mf-seg" id="mf-chrome-seg">
-        <button class="mf-seg-btn on" onclick="setChrome('light',this)">Light</button>
-        <button class="mf-seg-btn" onclick="setChrome('dark',this)">Dark</button>
-      </div>
-    </div>
-    <button class="mf-generate" onclick="generate()">Generate →</button>
-  </div>
 
-  <div id="mf-canvas">
-    <div id="mf-output"></div>
-  </div>
+    <div><h3>Background</h3><div class="bgs" id="bgs"></div></div>
 
-  <div id="mf-info">
-    <div id="mf-info-left">Browser mockup · light chrome</div>
-    <button class="mf-dl-btn" onclick="copyHTML()">Copy HTML</button>
-  </div>
+    <div><h3>Layout</h3>
+      <div class="seg" id="aspect" style="margin-bottom:12px"><button data-v="auto" aria-pressed="true">Auto</button><button data-v="16:9" aria-pressed="false">16:9</button><button data-v="1:1" aria-pressed="false">1:1</button><button data-v="4:5" aria-pressed="false">4:5</button><button data-v="9:16" aria-pressed="false">9:16</button></div>
+      <div class="slider"><label for="pad">Padding</label><input type="range" id="pad" min="0" max="200" value="80"><output></output></div>
+      <div class="slider"><label for="radius">Radius</label><input type="range" id="radius" min="0" max="40" value="14"><output></output></div>
+      <div class="slider"><label for="shadow">Shadow</label><input type="range" id="shadow" min="0" max="100" value="55"><output></output></div>
+    </div>
+
+    <div><h3>Text</h3>
+      <div class="field"><label for="url">Address bar</label><input id="url" value="yourproduct.com"></div>
+      <div class="field" id="ph-fields"><label for="title">Placeholder title</label><input id="title" value="Ship something people love"><label for="desc">Placeholder line</label><input id="desc" value="A clean landing page, framed and ready to share."></div>
+    </div>
+
+    <div class="row"><button class="btn" id="copy">Copy image</button><button class="btn primary" id="download">Download PNG</button></div>
+    <p class="hint">Exports at 2× for crisp results on retina screens.</p>
+    <footer>Made during Ship69, rebuilt Oct 2026 · <a href="https://neeleshagrawal.vercel.app" target="_blank" rel="noopener">neeleshagrawal.vercel.app</a></footer>
+  </aside>
+  <main><canvas id="cv" aria-label="Mockup preview"></canvas></main>
 </div>
-
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
-let device='browser', chromeStyle='light';
-let currentTitle='Escape 9–5', currentDesc='The office survival platformer', currentUrl='escape9to5.vercel.app';
+const $ = s => document.querySelector(s);
+const BGS = [
+  'linear-gradient(135deg,#7c3aed,#f472b6)', 'linear-gradient(135deg,#0ea5e9,#22d3ee)', 'linear-gradient(135deg,#f97316,#facc15)',
+  'linear-gradient(135deg,#0f172a,#334155)', 'linear-gradient(135deg,#16a34a,#a3e635)', 'linear-gradient(135deg,#fde68a,#fca5a5)',
+  'linear-gradient(135deg,#1e1b4b,#7c3aed)', 'linear-gradient(135deg,#f5f0e8,#e7dccb)', '#ffffff', '#111111',
+];
+const state = { img: null, frame: 'browser', bg: BGS[0], aspect: 'auto', pad: 80, radius: 14, shadow: 55 };
+const cv = $('#cv'), ctx = cv.getContext('2d');
 
-function setDevice(d,btn){
-  device=d;
-  document.querySelectorAll('#mf-device-seg .mf-seg-btn').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  if(d==='browser'){
-    document.querySelectorAll('#mf-chrome-seg .mf-seg-btn').forEach(b=>b.style.display='flex');
+// paint a CSS-like linear-gradient(135deg,a,b) or a solid colour
+function paintBg(c, w, h, bg) {
+  if (bg === 'transparent') return;
+  const m = bg.match(/linear-gradient\(135deg,(#[0-9a-f]+),(#[0-9a-f]+)\)/i);
+  if (m) { const g = c.createLinearGradient(0, 0, w, h); g.addColorStop(0, m[1]); g.addColorStop(1, m[2]); c.fillStyle = g; } else c.fillStyle = bg;
+  c.fillRect(0, 0, w, h);
+}
+const rr = (c, x, y, w, h, r) => { c.beginPath(); c.roundRect(x, y, w, h, r); };
+
+// the placeholder page shown until a screenshot is added (the original Mockframe idea)
+function placeholder(w, h, dark) {
+  const p = document.createElement('canvas'); p.width = w; p.height = h; const c = p.getContext('2d');
+  c.fillStyle = dark ? '#0d0d0f' : '#ffffff'; c.fillRect(0, 0, w, h);
+  const ink = dark ? '#f4f4f5' : '#111111', sub = dark ? '#8a8a93' : '#6b7280', s = w / 1280;
+  c.fillStyle = sub; c.font = `600 ${15 * s}px Inter`; c.fillText('●  yourproduct', 48 * s, 48 * s);
+  c.textAlign = 'center'; c.fillStyle = ink; c.font = `800 ${58 * s}px Inter`;
+  const title = $('#title').value || 'Your product'; c.fillText(title, w / 2, h * 0.42, w * 0.86);
+  c.fillStyle = sub; c.font = `400 ${22 * s}px Inter`; c.fillText($('#desc').value || '', w / 2, h * 0.42 + 46 * s, w * 0.8);
+  c.fillStyle = ink; rr(c, w / 2 - 170 * s, h * 0.42 + 84 * s, 160 * s, 48 * s, 24 * s); c.fill();
+  c.strokeStyle = dark ? '#3f3f46' : '#d4d4d8'; c.lineWidth = 1.5 * s; rr(c, w / 2 + 10 * s, h * 0.42 + 84 * s, 160 * s, 48 * s, 24 * s); c.stroke();
+  c.fillStyle = dark ? '#111' : '#fff'; c.font = `600 ${16 * s}px Inter`; c.fillText('Get started', w / 2 - 90 * s, h * 0.42 + 114 * s);
+  c.fillStyle = ink; c.fillText('Learn more', w / 2 + 90 * s, h * 0.42 + 114 * s);
+  return p;
+}
+
+function draw(scale = 1) {
+  const phone = state.frame === 'phone', dark = state.frame === 'browser-dark';
+  const shot = state.img || placeholder(phone ? 390 * 2 : 1280, phone ? 844 * 2 : 800, dark);
+  // size of the framed device
+  const bar = state.frame.startsWith('browser') ? 44 : 0;
+  // the phone always has a portrait screen; wide screenshots are cropped from the top
+  let fw, fh;
+  if (phone) { fh = 860; fw = (fh - 28) * 390 / 844 + 28; } else { fw = 1280; fh = fw * shot.height / shot.width + bar; }
+  const pad = state.pad * 1.6;
+  let W = fw + pad * 2, H = fh + pad * 2;
+  if (state.aspect !== 'auto') { const [a, b] = state.aspect.split(':').map(Number); const r = a / b; if (W / H > r) H = W / r; else W = H * r; }
+  cv.width = Math.round(W * scale); cv.height = Math.round(H * scale);
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+  paintBg(ctx, W, H, state.bg);
+  const x = (W - fw) / 2, y = (H - fh) / 2, R = phone ? 54 : state.radius * 1.6;
+  // shadow
+  if (state.shadow) { ctx.save(); ctx.shadowColor = `rgba(0,0,0,${0.15 + state.shadow / 220})`; ctx.shadowBlur = state.shadow * 1.4; ctx.shadowOffsetY = state.shadow * 0.5; ctx.fillStyle = '#000'; rr(ctx, x, y, fw, fh, R); ctx.fill(); ctx.restore(); }
+  if (phone) {
+    ctx.fillStyle = '#0b0b0d'; rr(ctx, x, y, fw, fh, R); ctx.fill();
+    ctx.strokeStyle = '#3a3a3f'; ctx.lineWidth = 3; rr(ctx, x + 1.5, y + 1.5, fw - 3, fh - 3, R - 1); ctx.stroke();
+    const sw = fw - 28, sh = fh - 28, k = Math.max(sw / shot.width, sh / shot.height);
+    const cw = sw / k, ch = sh / k, cx = (shot.width - cw) / 2;
+    ctx.save(); rr(ctx, x + 14, y + 14, sw, sh, R - 12); ctx.clip(); ctx.drawImage(shot, cx, 0, cw, ch, x + 14, y + 14, sw, sh); ctx.restore();
+    ctx.fillStyle = '#0b0b0d'; rr(ctx, x + fw / 2 - 52, y + 28, 104, 30, 15); ctx.fill();
   } else {
-    document.querySelectorAll('#mf-chrome-seg .mf-seg-btn').forEach(b=>b.style.display='none');
+    ctx.save(); rr(ctx, x, y, fw, fh, R); ctx.clip();
+    if (bar) {
+      ctx.fillStyle = dark ? '#232327' : '#f1f0ee'; ctx.fillRect(x, y, fw, bar);
+      ['#ff5f57', '#febc2e', '#28c840'].forEach((c, i) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x + 22 + i * 20, y + bar / 2, 6, 0, Math.PI * 2); ctx.fill(); });
+      ctx.fillStyle = dark ? '#34343a' : '#ffffff'; rr(ctx, x + fw / 2 - 200, y + 9, 400, 26, 8); ctx.fill();
+      ctx.fillStyle = dark ? '#b4b4bd' : '#55555c'; ctx.font = '500 13px Inter'; ctx.textAlign = 'center'; ctx.fillText($('#url').value || '', x + fw / 2, y + bar / 2 + 4.5, 370); ctx.textAlign = 'start';
+    }
+    ctx.drawImage(shot, x, y + bar, fw, fh - bar); ctx.restore();
   }
+  $('#nofile').hidden = !!state.img; $('#ph-fields').style.display = state.img ? 'none' : '';
+  document.querySelectorAll('.slider').forEach(s => s.querySelector('output').textContent = s.querySelector('input').value);
 }
 
-function setChrome(c,btn){
-  chromeStyle=c;
-  document.querySelectorAll('#mf-chrome-seg .mf-seg-btn').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
+function loadFile(f) {
+  if (!f || !f.type.startsWith('image/')) return toast('That file is not an image');
+  const img = new Image(); img.onload = () => { state.img = img; draw(); toast('Screenshot added'); }; img.src = URL.createObjectURL(f);
 }
+$('#file').addEventListener('change', e => loadFile(e.target.files[0]));
+const drop = $('#drop');
+['dragenter', 'dragover'].forEach(t => document.addEventListener(t, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(t => document.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('over'); }));
+document.addEventListener('drop', e => loadFile(e.dataTransfer.files[0]));
+document.addEventListener('paste', e => { const it = [...e.clipboardData.items].find(i => i.type.startsWith('image/')); if (it) loadFile(it.getAsFile()); });
 
-function generate(){
-  currentTitle=document.getElementById('mf-title').value||'Your Product';
-  currentDesc=document.getElementById('mf-desc').value||'A great product';
-  currentUrl=document.getElementById('mf-url').value||'yoursite.com';
-  const out=document.getElementById('mf-output');
-  if(device==='browser') out.innerHTML=browserHTML();
-  else out.innerHTML=phoneHTML(device==='phone-dark'?'dark':'light');
-  document.getElementById('mf-info-left').textContent=
-    device==='browser'?`Browser mockup · ${chromeStyle} chrome`:
-    `Phone mockup · ${device==='phone-dark'?'dark':'light'}`;
-}
+const seg = (id, key) => $(id).addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; state[key] = b.dataset.v; $(id).querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); draw(); });
+seg('#frame', 'frame'); seg('#aspect', 'aspect');
+$('#bgs').innerHTML = BGS.map((b, i) => `<button style="background:${b}" data-i="${i}" aria-label="Background ${i + 1}" aria-pressed="${i === 0}"></button>`).join('') + `<button class="clear" data-i="clear" aria-label="Transparent" aria-pressed="false"></button><label aria-label="Custom colour"><input type="color" id="custom" value="#e8e2d6"></label>`;
+$('#bgs').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; state.bg = b.dataset.i === 'clear' ? 'transparent' : BGS[b.dataset.i]; $('#bgs').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); draw(); });
+$('#custom').addEventListener('input', e => { state.bg = e.target.value; $('#bgs').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', false)); draw(); });
+['pad', 'radius', 'shadow'].forEach(k => $('#' + k).addEventListener('input', e => { state[k] = +e.target.value; draw(); }));
+['url', 'title', 'desc'].forEach(k => $('#' + k).addEventListener('input', () => draw()));
 
-function browserHTML(){
-  const isDark=chromeStyle==='dark';
-  const dots=isDark?
-    `<div class="browser-dot" style="background:#ff5f57;"></div><div class="browser-dot" style="background:#febc2e;"></div><div class="browser-dot" style="background:#28c840;"></div>`:
-    `<div class="browser-dot" style="background:#ff5f57;"></div><div class="browser-dot" style="background:#febc2e;"></div><div class="browser-dot" style="background:#28c840;"></div>`;
-  return`<div class="mock-browser ${isDark?'dark':''}">
-    <div class="browser-chrome">
-      <div class="browser-dots">${dots}</div>
-      <div class="browser-urlbar">
-        <div class="browser-lock"></div>
-        <div class="browser-url">${currentUrl}</div>
-      </div>
-    </div>
-    <div class="browser-content">
-      <div class="browser-content-hero">
-        <div class="bc-tag">Ship69 · Day build</div>
-        <div class="bc-title">${currentTitle}</div>
-        <div class="bc-desc">${currentDesc}</div>
-        <div class="bc-cta">
-          <div class="bc-btn bc-btn-p">Get started</div>
-          <div class="bc-btn bc-btn-s">Learn more</div>
-        </div>
-      </div>
-      <div class="browser-content-footer">
-        <div class="bcf-left">
-          <div class="bcf-link">About</div>
-          <div class="bcf-link">Work</div>
-          <div class="bcf-link">Contact</div>
-        </div>
-        <div class="bcf-right">${currentUrl}</div>
-      </div>
-    </div>
-  </div>`;
-}
-
-function phoneHTML(theme){
-  const isDark=theme==='dark';
-  const screenBg=isDark?'#0a0a0a':'#fff';
-  const cardBg=isDark?'#1a1a1a':'#f5f5f5';
-  const textC=isDark?'#f0f0f0':'#0a0a0a';
-  const subC=isDark?'#555':'#aaa';
-  const fillC=isDark?'#f0f0f0':'#0a0a0a';
-  const borderC=isDark?'#1a1a1a':'#e8e8e8';
-  const outerBg=isDark?'#1a1a1a':'#e0e0e0';
-  const statusBg=isDark?'#0a0a0a':'#fff';
-  const timeC=isDark?'#f0f0f0':'#0a0a0a';
-  return`<div class="mock-phone ${isDark?'dark':'light'}">
-    <div class="phone-outer" style="background:${outerBg};">
-      <div class="phone-screen" style="background:${screenBg};">
-        <div class="phone-status" style="background:${statusBg};padding:10px 16px 4px;">
-          <div class="phone-time" style="color:${timeC};font-family:'Space Mono',monospace;font-size:11px;font-weight:700;">9:41</div>
-          <div style="display:flex;gap:5px;align-items:center;">
-            <div style="display:flex;gap:2px;align-items:flex-end;">
-              <div style="width:3px;height:5px;background:${timeC};border-radius:1px;opacity:0.4;"></div>
-              <div style="width:3px;height:8px;background:${timeC};border-radius:1px;opacity:0.7;"></div>
-              <div style="width:3px;height:11px;background:${timeC};border-radius:1px;"></div>
-            </div>
-            <div style="width:16px;height:8px;border:1.5px solid ${timeC};border-radius:2px;position:relative;opacity:0.9;">
-              <div style="position:absolute;left:1px;top:1px;bottom:1px;width:55%;background:${timeC};border-radius:1px;"></div>
-            </div>
-          </div>
-        </div>
-        <div style="padding:12px 16px 8px;background:${screenBg};">
-          <div style="font-size:18px;font-weight:600;color:${textC};line-height:1.1;font-family:'Inter',sans-serif;">${currentTitle}</div>
-          <div style="font-size:11px;color:${subC};margin-top:3px;font-family:'Inter',sans-serif;">${currentDesc}</div>
-        </div>
-        <div style="padding:8px 16px;background:${screenBg};">
-          ${[['Primary feature','Core functionality of your product','75%'],['Secondary feature','Supporting feature with good retention','52%'],['Third feature','Another key value proposition','38%']].map(([t,s,w])=>`
-          <div style="background:${cardBg};border-radius:10px;padding:12px;margin-bottom:8px;">
-            <div style="font-size:12px;font-weight:500;color:${textC};margin-bottom:3px;font-family:'Inter',sans-serif;">${t}</div>
-            <div style="font-size:11px;color:${subC};line-height:1.4;font-family:'Inter',sans-serif;">${s}</div>
-            <div style="height:4px;background:${borderC};border-radius:2px;margin-top:8px;">
-              <div style="height:100%;width:${w};border-radius:2px;background:${fillC};"></div>
-            </div>
-          </div>`).join('')}
-        </div>
-        <div style="padding:8px 16px 12px;background:${screenBg};border-top:1px solid ${borderC};display:flex;justify-content:space-around;margin-top:4px;">
-          ${[true,false,false,false].map(active=>`
-          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-            <div style="width:20px;height:20px;border-radius:4px;background:${active?fillC:borderC};"></div>
-            <div style="width:5px;height:5px;border-radius:50%;background:${active?fillC:'transparent'};"></div>
-          </div>`).join('')}
-        </div>
-        <div style="width:72px;height:4px;background:${timeC};border-radius:2px;margin:6px auto 10px;opacity:0.15;"></div>
-      </div>
-    </div>
-  </div>`;
-}
-
-function copyHTML(){
-  const html=document.getElementById('mf-output').innerHTML;
-  navigator.clipboard.writeText(html).catch(()=>{});
-  const btn=event.target;
-  btn.textContent='Copied!';
-  setTimeout(()=>btn.textContent='Copy HTML',2000);
-}
-
-generate();
+const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('on'), 1700); };
+function exportBlob(cb) { draw(2); cv.toBlob(b => { draw(); cb(b); }, 'image/png'); }
+$('#download').addEventListener('click', () => exportBlob(b => { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `mockframe-${state.frame}.png`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); toast('PNG downloaded'); }));
+$('#copy').addEventListener('click', () => exportBlob(b => { if (!window.ClipboardItem) return toast('Copying images is not supported here, use Download'); navigator.clipboard.write([new ClipboardItem({ 'image/png': b })]).then(() => toast('Image copied')).catch(() => toast('Copy blocked, use Download')); }));
+document.fonts.ready.then(() => draw());
+draw();
 </script>
 </body>
 </html>
